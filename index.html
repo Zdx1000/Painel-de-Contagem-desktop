@@ -18,6 +18,26 @@
             <div class="header__actions">
                 <button id="config-btn" class="btn btn--ghost" type="button">Configurações</button>
                 <button id="parameters-btn" class="btn btn--ghost" type="button">Parâmetros dias</button>
+                <div class="count-toggle" role="group" aria-label="Tipo de contagem">
+                    <button
+                        id="count-mode-primeira"
+                        class="count-toggle__button is-active"
+                        type="button"
+                        data-count-mode="primeira"
+                        aria-pressed="true"
+                    >
+                        1ª contagem
+                    </button>
+                    <button
+                        id="count-mode-segunda"
+                        class="count-toggle__button"
+                        type="button"
+                        data-count-mode="segunda"
+                        aria-pressed="false"
+                    >
+                        2ª contagem
+                    </button>
+                </div>
                 <button id="save-dashboard" class="btn btn--primary btn--save" type="button">
                     <span class="btn__icon" aria-hidden="true">💾</span>
                     <span class="btn__label">Salvar dashboard</span>

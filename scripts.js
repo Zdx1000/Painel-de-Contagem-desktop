@@ -22,6 +22,7 @@ const state = {
 		itensNovos: 0,
 		total: 0,
 	},
+	countMode: "primeira",
 	graphs: {
 		grafico1: null,
 		grafico2: null,
@@ -173,6 +174,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	const parametersModal = document.querySelector("#parameters-modal");
 	const parametersForm = document.querySelector("#parameters-form");
 	const closeParametersBtn = document.querySelector("#close-parameters");
+	const countModeButtons = Array.from(
+		document.querySelectorAll("[data-count-mode]"),
+	);
 	const configInputs = {
 		finalizadoSegundaContagem: document.querySelector("#config-finalizado-segunda"),
 		finalizadoPrimeiraContagem: document.querySelector("#config-finalizado-primeira"),
@@ -210,6 +214,21 @@ document.addEventListener("DOMContentLoaded", () => {
 		document.querySelectorAll(".graph-placeholder"),
 	);
 	const graphElements = new Map();
+
+	function setCountMode(mode) {
+		if (mode !== "primeira" && mode !== "segunda") {
+			return;
+		}
+
+		state.countMode = mode;
+		document.body.dataset.countMode = mode;
+
+		countModeButtons.forEach((button) => {
+			const isActive = button.dataset.countMode === mode;
+			button.classList.toggle("is-active", isActive);
+			button.setAttribute("aria-pressed", String(isActive));
+		});
+	}
 
 	function renderGraphPlaceholder(key) {
 		const element = graphElements.get(key);
@@ -420,6 +439,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		renderGraphPlaceholder(key);
 	});
+
+	countModeButtons.forEach((button) => {
+		button.addEventListener("click", () => {
+			setCountMode(button.dataset.countMode);
+		});
+	});
+
+	setCountMode(state.countMode);
 
 	graphContextPasteBtn?.addEventListener("click", async () => {
 		if (!currentGraphContextKey) {
