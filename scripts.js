@@ -228,6 +228,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			button.classList.toggle("is-active", isActive);
 			button.setAttribute("aria-pressed", String(isActive));
 		});
+
+		updateDerivedMetrics();
 	}
 
 	function renderGraphPlaceholder(key) {
@@ -576,7 +578,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		const skusRestantePrimeira = novos;
 		const skusSegundaConcluida = segunda;
 		const totalSkusEstoque = totalConfig + novos;
-		const metaDiaria = diasUteis > 0 ? Math.ceil(skusRestanteSegunda / diasUteis) : 0;
+		const metaBase =
+			state.countMode === "primeira"
+				? skusRestantePrimeira
+				: skusRestanteSegunda;
+		const metaDiaria = diasUteis > 0 ? Math.ceil(metaBase / diasUteis) : 0;
 		const percentualSemContagem = totalSkusEstoque > 0 ? (skusRestanteSegunda / totalSkusEstoque) * 100 : 0;
 		const percentualContadoSegunda = totalSkusEstoque > 0 ? (skusSegundaConcluida / totalSkusEstoque) * 100 : 0;
 		const percentualSemContagemSegunda = totalSkusEstoque > 0 ? (skusRestantePrimeira / totalSkusEstoque) * 100 : 0;
