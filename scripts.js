@@ -249,6 +249,26 @@ document.addEventListener("DOMContentLoaded", () => {
 			button.classList.toggle("is-active", isActive);
 			button.setAttribute("aria-pressed", String(isActive));
 		});
+
+		updateDashboardCardVisibility();
+		updateDerivedMetrics();
+	}
+
+	function updateDashboardCardVisibility() {
+		const orderedFields = visibleDashboardFieldsByCountMode[state.countMode];
+		if (!orderedFields) {
+			return;
+		}
+
+		dashboardCardElements.forEach((card) => {
+			const field = card.dataset.field;
+			const visibleIndex = orderedFields.indexOf(field);
+			const shouldHide = visibleIndex === -1;
+
+			card.hidden = shouldHide;
+			card.setAttribute("aria-hidden", String(shouldHide));
+			card.style.order = shouldHide ? "" : String(visibleIndex);
+		});
 	}
 
 	function renderGraphPlaceholder(key) {
@@ -596,9 +616,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		const skusRestanteSegunda = primeira + novos * 2;
 		const skusRestantePrimeira = novos;
 		const skusSegundaConcluida = segunda;
-		const totalSkusEstoque = totalConfig + novos;
-		const metaDiaria = diasUteis > 0 ? Math.ceil(skusRestanteSegunda / diasUteis) : 0;
-		const percentualSemContagem = totalSkusEstoque > 0 ? (skusRestanteSegunda / totalSkusEstoque) * 100 : 0;
+		const skusPrimeiraConcluida = primeira;
+		const totalSkusEstoque = totalConfig;
+		const skusBaseMetaDiaria = state.countMode === "primeira"
+			? skusRestantePrimeira
+			: skusRestanteSegunda;
+		const metaDiaria = diasUteis > 0 ? Math.ceil(skusBaseMetaDiaria / diasUteis) : 0;
+		const percentualSemContagem = totalConfig > 0 ? (primeira / totalConfig) * 100 : 0;
 		const percentualContadoSegunda = totalSkusEstoque > 0 ? (skusSegundaConcluida / totalSkusEstoque) * 100 : 0;
 		const percentualContadoPrimeira = totalConfig > 0 ? (novos / totalConfig) * 100 : 0;
 		const baseSemContagemSegunda = primeira + novos * 2;
