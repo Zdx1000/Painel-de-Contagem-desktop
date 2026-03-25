@@ -111,9 +111,20 @@
                      <span class="card__suffix" aria-hidden="true">%</span>
                  </div>
             </article>
+            <article class="card" data-field="percentualContadoPrimeira">
+                <label for="percentual-contado-primeira">% contado 1ª contagem</label>
+                <div class="card__value card__value--with-suffix">
+                    <input id="percentual-contado-primeira" name="percentualContadoPrimeira" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
+                    <span class="card__suffix" aria-hidden="true">%</span>
+                </div>
+            </article>
             <article class="card" data-field="skusRestantePrimeira">
                 <label for="skus-restante-primeira">SKU's restante p/ contar 1ª contagem</label>
                  <input id="skus-restante-primeira" name="skusRestantePrimeira" type="number" min="0" step="1" placeholder="0" readonly>
+            </article>
+            <article class="card" data-field="skusPrimeiraConcluida">
+                <label for="skus-primeira-concluida">SKU's - 1ª contagem concluída</label>
+                <input id="skus-primeira-concluida" name="skusPrimeiraConcluida" type="number" min="0" step="1" placeholder="0" readonly>
             </article>
         </section>
 

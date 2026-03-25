@@ -387,6 +387,10 @@ body {
 	min-height: 125px;
 }
 
+#dashboard-cards .card[hidden] {
+	display: none !important;
+}
+
 
 .card::before {
 	content: "";

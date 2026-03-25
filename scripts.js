@@ -197,12 +197,33 @@ document.addEventListener("DOMContentLoaded", () => {
 		totalSkusEstoque: document.querySelector("#total-skus-estoque"),
 		skusRestanteSegunda: document.querySelector("#skus-restante-segunda"),
 		skusSegundaConcluida: document.querySelector("#skus-segunda-concluida"),
+		skusPrimeiraConcluida: document.querySelector("#skus-primeira-concluida"),
 		percentualSemContagem: document.querySelector("#percentual-sem-contagem"),
 		percentualContadoSegunda: document.querySelector("#percentual-contado-segunda"),
+		percentualContadoPrimeira: document.querySelector("#percentual-contado-primeira"),
 		percentualSemContagemSegunda: document.querySelector("#percentual-sem-contagem-segunda"),
 		skusRestantePrimeira: document.querySelector("#skus-restante-primeira"),
 		metaContagemDiaria: document.querySelector("#meta-contagem-diaria"),
 		previsaoTermino: document.querySelector("#previsao-termino"),
+	};
+	const dashboardCardElements = Array.from(
+		document.querySelectorAll("#dashboard-cards .card"),
+	);
+	const visibleDashboardFieldsByCountMode = {
+		primeira: [
+			"totalSkusEstoque",
+			"skusRestantePrimeira",
+			"skusPrimeiraConcluida",
+			"percentualContadoPrimeira",
+			"percentualSemContagem",
+		],
+		segunda: [
+			"totalSkusEstoque",
+			"skusRestanteSegunda",
+			"skusSegundaConcluida",
+			"percentualContadoSegunda",
+			"percentualSemContagemSegunda",
+		],
 	};
 
 	const parametersInputs = {
@@ -227,6 +248,26 @@ document.addEventListener("DOMContentLoaded", () => {
 			const isActive = button.dataset.countMode === mode;
 			button.classList.toggle("is-active", isActive);
 			button.setAttribute("aria-pressed", String(isActive));
+		});
+
+		updateDashboardCardVisibility();
+		updateDerivedMetrics();
+	}
+
+	function updateDashboardCardVisibility() {
+		const orderedFields = visibleDashboardFieldsByCountMode[state.countMode];
+		if (!orderedFields) {
+			return;
+		}
+
+		dashboardCardElements.forEach((card) => {
+			const field = card.dataset.field;
+			const visibleIndex = orderedFields.indexOf(field);
+			const shouldHide = visibleIndex === -1;
+
+			card.hidden = shouldHide;
+			card.setAttribute("aria-hidden", String(shouldHide));
+			card.style.order = shouldHide ? "" : String(visibleIndex);
 		});
 	}
 
@@ -575,11 +616,19 @@ document.addEventListener("DOMContentLoaded", () => {
 		const skusRestanteSegunda = primeira + novos * 2;
 		const skusRestantePrimeira = novos;
 		const skusSegundaConcluida = segunda;
-		const totalSkusEstoque = totalConfig + novos;
-		const metaDiaria = diasUteis > 0 ? Math.ceil(skusRestanteSegunda / diasUteis) : 0;
-		const percentualSemContagem = totalSkusEstoque > 0 ? (skusRestanteSegunda / totalSkusEstoque) * 100 : 0;
+		const skusPrimeiraConcluida = primeira;
+		const totalSkusEstoque = totalConfig;
+		const skusBaseMetaDiaria = state.countMode === "primeira"
+			? skusRestantePrimeira
+			: skusRestanteSegunda;
+		const metaDiaria = diasUteis > 0 ? Math.ceil(skusBaseMetaDiaria / diasUteis) : 0;
+		const percentualSemContagem = totalConfig > 0 ? (primeira / totalConfig) * 100 : 0;
 		const percentualContadoSegunda = totalSkusEstoque > 0 ? (skusSegundaConcluida / totalSkusEstoque) * 100 : 0;
-		const percentualSemContagemSegunda = totalSkusEstoque > 0 ? (skusRestantePrimeira / totalSkusEstoque) * 100 : 0;
+		const percentualContadoPrimeira = totalConfig > 0 ? (novos / totalConfig) * 100 : 0;
+		const baseSemContagemSegunda = primeira + novos * 2;
+		const percentualSemContagemSegunda = baseSemContagemSegunda > 0
+			? 100 - (segunda / baseSemContagemSegunda) * 100
+			: 0;
 
 		if (metricsInputs.skusRestanteSegunda) {
 			metricsInputs.skusRestanteSegunda.value = skusRestanteSegunda;
@@ -587,6 +636,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		if (metricsInputs.skusSegundaConcluida) {
 			metricsInputs.skusSegundaConcluida.value = skusSegundaConcluida;
+		}
+
+		if (metricsInputs.skusPrimeiraConcluida) {
+			metricsInputs.skusPrimeiraConcluida.value = skusPrimeiraConcluida;
 		}
 
 		if (metricsInputs.skusRestantePrimeira) {
@@ -607,6 +660,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		if (metricsInputs.percentualContadoSegunda) {
 			metricsInputs.percentualContadoSegunda.value = Number(percentualContadoSegunda.toFixed(2));
+		}
+
+		if (metricsInputs.percentualContadoPrimeira) {
+			metricsInputs.percentualContadoPrimeira.value = Number(percentualContadoPrimeira.toFixed(2));
 		}
 
 		if (metricsInputs.percentualSemContagemSegunda) {
