@@ -622,9 +622,9 @@ document.addEventListener("DOMContentLoaded", () => {
 			? skusRestantePrimeira
 			: skusRestanteSegunda;
 		const metaDiaria = diasUteis > 0 ? Math.ceil(skusBaseMetaDiaria / diasUteis) : 0;
-		const percentualSemContagem = totalConfig > 0 ? (primeira / totalConfig) * 100 : 0;
+		const percentualSemContagem = totalConfig > 0 ? (novos / totalConfig) * 100 : 0;
 		const percentualContadoSegunda = totalSkusEstoque > 0 ? (skusSegundaConcluida / totalSkusEstoque) * 100 : 0;
-		const percentualContadoPrimeira = totalConfig > 0 ? (novos / totalConfig) * 100 : 0;
+		const percentualContadoPrimeira = totalConfig > 0 ? (primeira / totalConfig) * 100 : 0;
 		const baseSemContagemSegunda = primeira + novos * 2;
 		const percentualSemContagemSegunda = baseSemContagemSegunda > 0
 			? 100 - (segunda / baseSemContagemSegunda) * 100
