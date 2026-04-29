@@ -1,20 +1,3 @@
-const GRAPH_HINT_TEXT =
-	"Solte aqui uma imagem (PNG, JPG, SVG ou WEBP) ou use o botão acima.";
-const SUPPORTED_IMAGE_TYPES = new Set([
-	"image/png",
-	"image/jpeg",
-	"image/jpg",
-	"image/svg+xml",
-	"image/webp",
-]);
-const MIME_EXTENSION_MAP = {
-	"image/png": "png",
-	"image/jpeg": "jpg",
-	"image/jpg": "jpg",
-	"image/svg+xml": "svg",
-	"image/webp": "webp",
-};
-
 const state = {
 	config: {
 		finalizadoSegundaContagem: 0,
@@ -23,10 +6,6 @@ const state = {
 		total: 0,
 	},
 	countMode: "primeira",
-	graphs: {
-		grafico1: null,
-		grafico2: null,
-	},
 };
 
 function parseNumber(value) {
@@ -186,12 +165,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	let autoRefreshTimeoutId = null;
 	let latestDashboardRequestId = 0;
 	let latestDashboardResponseId = 0;
-	let lastActiveGraphKey = null;
-	const graphContextMenu = document.querySelector("#graph-context-menu");
-	const graphContextPasteBtn = graphContextMenu?.querySelector(
-		"[data-graph-context=\"paste\"]",
-	);
-	let currentGraphContextKey = null;
 
 	const metricsInputs = {
 		totalSkusEstoque: document.querySelector("#total-skus-estoque"),
@@ -231,11 +204,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		diasUteis: document.querySelector("#dias-uteis"),
 	};
 
-	const graphPlaceholders = Array.from(
-		document.querySelectorAll(".graph-placeholder"),
-	);
-	const graphElements = new Map();
-
 	function setCountMode(mode) {
 		if (mode !== "primeira" && mode !== "segunda") {
 			return;
@@ -271,216 +239,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 
-	function renderGraphPlaceholder(key) {
-		const element = graphElements.get(key);
-		if (!element) {
-			return;
-		}
-
-		const { placeholder, content, clearBtn, label } = element;
-		const data = state.graphs?.[key];
-
-		if (data?.src) {
-			placeholder.classList.add("is-filled");
-			if (clearBtn) {
-				clearBtn.hidden = false;
-			}
-			content.innerHTML = `<img src="${data.src}" alt="Imagem anexada ao ${label}">`;
-		} else {
-			placeholder.classList.remove("is-filled");
-			if (clearBtn) {
-				clearBtn.hidden = true;
-			}
-			content.innerHTML = `<span class="graph-placeholder__hint">${GRAPH_HINT_TEXT}</span>`;
-		}
-	}
-
-	function handleGraphFileSelection(key, fileList) {
-		const file = fileList?.[0];
-		if (!file) {
-			return;
-		}
-
-		applyGraphFile(key, file);
-	}
-
-	function applyGraphFile(key, file) {
-		if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
-			alert("Formato de imagem não suportado. Utilize PNG, JPG, SVG ou WEBP.");
-			return false;
-		}
-
-		const reader = new FileReader();
-		reader.onload = () => {
-			state.graphs[key] = {
-				src: reader.result,
-				name:
-					file.name?.trim() && file.name !== ""
-						? file.name
-						: `grafico-${Date.now()}.${MIME_EXTENSION_MAP[file.type] ?? "png"}`,
-				type: file.type,
-				lastModified: file.lastModified,
-			};
-			renderGraphPlaceholder(key);
-		};
-		reader.readAsDataURL(file);
-		return true;
-	}
-
-	async function pasteImageFromClipboard(key) {
-		if (!navigator.clipboard?.read) {
-			alert(
-				"Seu navegador não permite ler imagens do clipboard automaticamente. Use Ctrl+V ou o botão Carregar imagem.",
-			);
-			return;
-		}
-
-		try {
-			const items = await navigator.clipboard.read();
-			for (const item of items) {
-				const supportedType = item.types.find((type) =>
-					SUPPORTED_IMAGE_TYPES.has(type),
-				);
-				if (!supportedType) {
-					continue;
-				}
-				const blob = await item.getType(supportedType);
-				const extension = MIME_EXTENSION_MAP[supportedType] ?? "png";
-				const file = new File(
-					[blob],
-					`clipboard-${Date.now()}.${extension}`,
-					{ type: supportedType, lastModified: Date.now() },
-				);
-				if (applyGraphFile(key, file)) {
-					return;
-				}
-			}
-			alert("Não encontrei imagens na área de transferência.");
-		} catch (error) {
-			console.error(error);
-			alert(
-				"Não foi possível acessar a área de transferência. Verifique as permissões do navegador ou utilize Ctrl+V.",
-			);
-		}
-	}
-
-	function showGraphContextMenu(event, key) {
-		if (!graphContextMenu) {
-			return;
-		}
-
-		hideGraphContextMenu();
-
-		currentGraphContextKey = key;
-		graphContextMenu.hidden = false;
-		graphContextMenu.style.left = "0px";
-		graphContextMenu.style.top = "0px";
-
-		requestAnimationFrame(() => {
-			const menuRect = graphContextMenu.getBoundingClientRect();
-			const padding = 8;
-			const viewportWidth = window.innerWidth + window.scrollX;
-			const viewportHeight = window.innerHeight + window.scrollY;
-			let left = event.pageX;
-			let top = event.pageY;
-
-			if (left + menuRect.width + padding > viewportWidth) {
-				left = viewportWidth - menuRect.width - padding;
-			}
-			if (top + menuRect.height + padding > viewportHeight) {
-				top = viewportHeight - menuRect.height - padding;
-			}
-
-			left = Math.max(window.scrollX + padding, left);
-			top = Math.max(window.scrollY + padding, top);
-
-			graphContextMenu.style.left = `${left}px`;
-			graphContextMenu.style.top = `${top}px`;
-		});
-	}
-
-	function hideGraphContextMenu() {
-		if (!graphContextMenu) {
-			return;
-		}
-		graphContextMenu.hidden = true;
-		currentGraphContextKey = null;
-	}
-
-	graphPlaceholders.forEach((placeholder) => {
-		const key = placeholder.dataset.graphKey;
-		if (!key) {
-			return;
-		}
-
-		const input = placeholder.querySelector(".graph-placeholder__input");
-		const uploadBtn = placeholder.querySelector(
-			"[data-graph-action=\"upload\"]",
-		);
-		const clearBtn = placeholder.querySelector(
-			"[data-graph-action=\"clear\"]",
-		);
-		const content = placeholder.querySelector("[data-graph-content]");
-		const label = placeholder.querySelector("h3")?.textContent ?? "gráfico";
-
-		graphElements.set(key, {
-			placeholder,
-			input,
-			uploadBtn,
-			clearBtn,
-			content,
-			label,
-		});
-
-		placeholder.addEventListener("mouseenter", () => {
-			lastActiveGraphKey = key;
-		});
-
-		placeholder.addEventListener("mousedown", () => {
-			lastActiveGraphKey = key;
-		});
-
-		placeholder.addEventListener("focusin", () => {
-			lastActiveGraphKey = key;
-		});
-
-		uploadBtn?.addEventListener("click", () => {
-			input?.click();
-		});
-
-		clearBtn?.addEventListener("click", () => {
-			state.graphs[key] = null;
-			renderGraphPlaceholder(key);
-		});
-
-		input?.addEventListener("change", (event) => {
-			handleGraphFileSelection(key, event.target.files);
-			event.target.value = "";
-		});
-
-		placeholder.addEventListener("dragover", (event) => {
-			event.preventDefault();
-			placeholder.classList.add("is-dragging");
-		});
-
-		placeholder.addEventListener("dragleave", () => {
-			placeholder.classList.remove("is-dragging");
-		});
-
-		placeholder.addEventListener("drop", (event) => {
-			event.preventDefault();
-			placeholder.classList.remove("is-dragging");
-			handleGraphFileSelection(key, event.dataTransfer?.files);
-		});
-
-		placeholder.addEventListener("contextmenu", (event) => {
-			event.preventDefault();
-			showGraphContextMenu(event, key);
-		});
-
-		renderGraphPlaceholder(key);
-	});
-
 	countModeButtons.forEach((button) => {
 		button.addEventListener("click", () => {
 			setCountMode(button.dataset.countMode);
@@ -488,63 +246,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 
 	setCountMode(state.countMode);
-
-	graphContextPasteBtn?.addEventListener("click", async () => {
-		if (!currentGraphContextKey) {
-			return;
-		}
-		await pasteImageFromClipboard(currentGraphContextKey);
-		hideGraphContextMenu();
-	});
-
-	document.addEventListener("click", (event) => {
-		if (!graphContextMenu || graphContextMenu.hidden) {
-			return;
-		}
-		if (graphContextMenu.contains(event.target)) {
-			return;
-		}
-		hideGraphContextMenu();
-	});
-
-	document.addEventListener("contextmenu", (event) => {
-		if (event.target.closest?.(".graph-placeholder")) {
-			return;
-		}
-		hideGraphContextMenu();
-	});
-
-	document.addEventListener("keydown", (event) => {
-		if (event.key === "Escape") {
-			hideGraphContextMenu();
-		}
-	});
-
-	window.addEventListener("blur", hideGraphContextMenu);
-
-	document.addEventListener(
-		"scroll",
-		() => {
-			hideGraphContextMenu();
-		},
-		true,
-	);
-
-	document.addEventListener("paste", (event) => {
-		const files = event.clipboardData?.files;
-		if (!files?.length) {
-			return;
-		}
-
-		const targetKey = currentGraphContextKey ?? lastActiveGraphKey;
-		if (!targetKey) {
-			return;
-		}
-
-		event.preventDefault();
-		handleGraphFileSelection(targetKey, files);
-		hideGraphContextMenu();
-	});
 
 	if (dataAtualizacaoInput) {
 		dataAtualizacaoInput.value = formatDateToBR(new Date());

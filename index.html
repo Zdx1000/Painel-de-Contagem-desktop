@@ -4,20 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventário Rotativo</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <main class="app">
         <header class="app__header">
             <div class="app__header-info">
-                <span class="app__badge" aria-hidden="true">Operação</span>
-                <h1>Inventário Rotativo &ndash; Painel de Contagem</h1>
-                <p class="app__subtitle">Monitoramento diário das contagens, metas e previsões.</p>
+                <span class="app__badge">Operação</span>
+                <h1>Inventário Rotativo</h1>
+                <p class="app__subtitle">Painel diário de contagem, metas e previsão de encerramento.</p>
             </div>
+
+            <div class="app__status" aria-label="Status do painel">
+                <span class="app__status-dot" aria-hidden="true"></span>
+                <span>Painel ativo</span>
+            </div>
+
             <div class="header__actions">
-                <button id="config-btn" class="btn btn--ghost" type="button">Configurações</button>
-                <button id="parameters-btn" class="btn btn--ghost" type="button">Parâmetros dias</button>
+                <button id="config-btn" class="btn btn--ghost" type="button">
+                    <i class="btn__icon fi fi-rr-settings-sliders" aria-hidden="true"></i>
+                    <span>Configurações</span>
+                </button>
+                <button id="parameters-btn" class="btn btn--ghost" type="button">
+                    <i class="btn__icon fi fi-rr-calendar-lines-pen" aria-hidden="true"></i>
+                    <span>Parâmetros dias</span>
+                </button>
                 <div class="count-toggle" role="group" aria-label="Tipo de contagem">
                     <button
                         id="count-mode-primeira"
@@ -39,125 +51,139 @@
                     </button>
                 </div>
                 <button id="save-dashboard" class="btn btn--primary btn--save" type="button">
-                    <span class="btn__icon" aria-hidden="true">💾</span>
+                    <i class="btn__icon fi fi-rr-disk" aria-hidden="true"></i>
                     <span class="btn__label">Salvar dashboard</span>
-                    <span class="btn__glow" aria-hidden="true"></span>
                 </button>
             </div>
         </header>
 
-        <section class="cards-grid cards-grid--top" id="dashboard-top-cards">
-            <article class="card card--highlight" data-field="dataAtualizacao">
-                <label for="data-atualizacao" class="card__label">
-                    <i class="card__icon fi fi-rr-calendar-clock" aria-hidden="true"></i>
-                    <span class="card__label-text">Data Atualização</span>
-                </label>
-                <input id="data-atualizacao" name="dataAtualizacao" type="text" readonly placeholder="dd/mm/aaaa">
-            </article>
-            <article class="card card--warehouse" data-field="armazem">
-                <label for="armazem" class="card__label">
-                    <i class="card__icon fi fi-rr-building" aria-hidden="true"></i>
-                    <span class="card__label-text">Armazém</span>
-                </label>
-                <input id="armazem" name="armazem" type="text" value="CD - UDI" readonly>
-            </article>
-            <article class="card card--goal" data-field="metaContagemDiaria">
-                <label for="meta-contagem-diaria" class="card__label">
-                    <i class="card__icon fi fi-rr-bullseye-arrow" aria-hidden="true"></i>
-                    <span class="card__label-text">Meta contagem diária para finalizar</span>
-                </label>
-                <input id="meta-contagem-diaria" name="metaContagemDiaria" type="number" min="0" step="1" placeholder="0" readonly>
-            </article>
-            <article class="card card--outlook" data-field="previsaoTermino">
-                <label for="previsao-termino" class="card__label">
-                    <i class="card__icon fi fi-rr-calendar" aria-hidden="true"></i>
-                    <span class="card__label-text">Previsão de término</span>
-                </label>
-                <input id="previsao-termino" name="previsaoTermino" type="date">
-            </article>
-        </section>
-
-        <section class="cards-grid" id="dashboard-cards">
-            <article class="card" data-field="totalSkusEstoque">
-                <label for="total-skus-estoque">Total SKU's com estoque</label>
-                <input id="total-skus-estoque" name="totalSkusEstoque" type="number" min="0" step="1" placeholder="0" readonly>
-            </article>
-            <article class="card" data-field="skusRestanteSegunda">
-                <label for="skus-restante-segunda">SKU's restante p/ contar 2ª contagem</label>
-                <input id="skus-restante-segunda" name="skusRestanteSegunda" type="number" min="0" step="1" placeholder="0" readonly>
-            </article>
-            <article class="card" data-field="skusSegundaConcluida">
-                <label for="skus-segunda-concluida">SKU's - 2ª contagem concluída</label>
-                <input id="skus-segunda-concluida" name="skusSegundaConcluida" type="number" min="0" step="1" placeholder="0" readonly>
-            </article>
-            <article class="card" data-field="percentualSemContagem">
-                <label for="percentual-sem-contagem">% sem contagem (1ª)</label>
-                <div class="card__value card__value--with-suffix">
-                    <input id="percentual-sem-contagem" name="percentualSemContagem" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
-                    <span class="card__suffix" aria-hidden="true">%</span>
-                </div>
-            </article>
-            <article class="card" data-field="percentualContadoSegunda">
-                <label for="percentual-contado-segunda">% contado 2ª contagem</label>
-                <div class="card__value card__value--with-suffix">
-                    <input id="percentual-contado-segunda" name="percentualContadoSegunda" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
-                    <span class="card__suffix" aria-hidden="true">%</span>
-                </div>
-            </article>
-            <article class="card" data-field="percentualSemContagemSegunda">
-                <label for="percentual-sem-contagem-segunda">% sem contagem (2ª)</label>
-                 <div class="card__value card__value--with-suffix">
-                     <input id="percentual-sem-contagem-segunda" name="percentualSemContagemSegunda" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
-                     <span class="card__suffix" aria-hidden="true">%</span>
-                 </div>
-            </article>
-            <article class="card" data-field="percentualContadoPrimeira">
-                <label for="percentual-contado-primeira">% contado 1ª contagem</label>
-                <div class="card__value card__value--with-suffix">
-                    <input id="percentual-contado-primeira" name="percentualContadoPrimeira" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
-                    <span class="card__suffix" aria-hidden="true">%</span>
-                </div>
-            </article>
-            <article class="card" data-field="skusRestantePrimeira">
-                <label for="skus-restante-primeira">SKU's restante p/ contar 1ª contagem</label>
-                 <input id="skus-restante-primeira" name="skusRestantePrimeira" type="number" min="0" step="1" placeholder="0" readonly>
-            </article>
-            <article class="card" data-field="skusPrimeiraConcluida">
-                <label for="skus-primeira-concluida">SKU's - 1ª contagem concluída</label>
-                <input id="skus-primeira-concluida" name="skusPrimeiraConcluida" type="number" min="0" step="1" placeholder="0" readonly>
-            </article>
-        </section>
-
-        <section class="graphics" aria-labelledby="graphics-title">
-            <div class="graphics__grid">
-                <div class="graph-placeholder" id="grafico-1" data-graph-key="grafico1" role="figure" aria-labelledby="grafico-1-label" tabindex="0">
-                    <header class="graph-placeholder__controls">
-                        <h3 id="grafico-1-label">Quantidade itens por Ano, Trimestre, Mês e Dia</h3>
-                        <div class="graph-placeholder__buttons">
-                            <button type="button" class="btn btn--ghost graph-placeholder__btn" data-graph-action="upload" data-target="grafico-1-input">Carregar imagem</button>
-                            <button type="button" class="btn btn--ghost graph-placeholder__btn graph-placeholder__btn--remove" data-graph-action="clear" hidden>Remover</button>
-                        </div>
-                    </header>
-                    <input id="grafico-1-input" class="graph-placeholder__input" type="file" accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp" hidden>
-                    <div class="graph-placeholder__content" data-graph-content>
-                        <span class="graph-placeholder__hint">Solte aqui uma imagem (PNG, JPG ou SVG) ou use o botão acima.</span>
-                    </div>
-                </div>
-                <div class="graph-placeholder" id="grafico-2" data-graph-key="grafico2" role="figure" aria-labelledby="grafico-2-label" tabindex="0">
-                    <header class="graph-placeholder__controls">
-                        <h3 id="grafico-2-label">Quantidade Endereço por Trimestre, Mês e Dia</h3>
-                        <div class="graph-placeholder__buttons">
-                            <button type="button" class="btn btn--ghost graph-placeholder__btn" data-graph-action="upload" data-target="grafico-2-input">Carregar imagem</button>
-                            <button type="button" class="btn btn--ghost graph-placeholder__btn graph-placeholder__btn--remove" data-graph-action="clear" hidden>Remover</button>
-                        </div>
-                    </header>
-                    <input id="grafico-2-input" class="graph-placeholder__input" type="file" accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp" hidden>
-                    <div class="graph-placeholder__content" data-graph-content>
-                        <span class="graph-placeholder__hint">Solte aqui uma imagem (PNG, JPG ou SVG) ou use o botão acima.</span>
-                    </div>
+        <section class="dashboard-section" aria-labelledby="overview-title">
+            <div class="section-heading">
+                <div>
+                    <span class="section-heading__eyebrow">Resumo</span>
+                    <h2 id="overview-title">Indicadores da operação</h2>
                 </div>
             </div>
+
+            <div class="cards-grid cards-grid--top" id="dashboard-top-cards">
+                <article class="card card--highlight" data-field="dataAtualizacao">
+                    <label for="data-atualizacao" class="card__label">
+                        <i class="card__icon fi fi-rr-calendar-clock" aria-hidden="true"></i>
+                        <span class="card__label-text">Data atualização</span>
+                    </label>
+                    <input id="data-atualizacao" name="dataAtualizacao" type="text" readonly placeholder="dd/mm/aaaa">
+                </article>
+                <article class="card card--warehouse" data-field="armazem">
+                    <label for="armazem" class="card__label">
+                        <i class="card__icon fi fi-rr-building" aria-hidden="true"></i>
+                        <span class="card__label-text">Armazém</span>
+                    </label>
+                    <input id="armazem" name="armazem" type="text" value="CD - UDI" readonly>
+                </article>
+                <article class="card card--goal" data-field="metaContagemDiaria">
+                    <label for="meta-contagem-diaria" class="card__label">
+                        <i class="card__icon fi fi-rr-bullseye-arrow" aria-hidden="true"></i>
+                        <span class="card__label-text">Meta diária</span>
+                    </label>
+                    <input id="meta-contagem-diaria" name="metaContagemDiaria" type="number" min="0" step="1" placeholder="0" readonly>
+                </article>
+                <article class="card card--outlook" data-field="previsaoTermino">
+                    <label for="previsao-termino" class="card__label">
+                        <i class="card__icon fi fi-rr-calendar" aria-hidden="true"></i>
+                        <span class="card__label-text">Previsão término</span>
+                    </label>
+                    <input id="previsao-termino" name="previsaoTermino" type="date">
+                </article>
+            </div>
         </section>
+
+        <section class="dashboard-section" aria-labelledby="counting-title">
+            <div class="section-heading section-heading--compact">
+                <div>
+                    <span class="section-heading__eyebrow">Contagem</span>
+                    <h2 id="counting-title">Ritmo por etapa</h2>
+                </div>
+            </div>
+
+            <div class="cards-grid cards-grid--metrics" id="dashboard-cards">
+                <article class="card" data-field="totalSkusEstoque">
+                    <label for="total-skus-estoque" class="card__label">
+                        <i class="card__icon fi fi-rr-box-open" aria-hidden="true"></i>
+                        <span class="card__label-text">Total SKU's com estoque</span>
+                    </label>
+                    <input id="total-skus-estoque" name="totalSkusEstoque" type="number" min="0" step="1" placeholder="0" readonly>
+                </article>
+                <article class="card" data-field="skusRestanteSegunda">
+                    <label for="skus-restante-segunda" class="card__label">
+                        <i class="card__icon fi fi-rr-hourglass-end" aria-hidden="true"></i>
+                        <span class="card__label-text">Restante 2ª contagem</span>
+                    </label>
+                    <input id="skus-restante-segunda" name="skusRestanteSegunda" type="number" min="0" step="1" placeholder="0" readonly>
+                </article>
+                <article class="card" data-field="skusSegundaConcluida">
+                    <label for="skus-segunda-concluida" class="card__label">
+                        <i class="card__icon fi fi-rr-check-circle" aria-hidden="true"></i>
+                        <span class="card__label-text">2ª contagem concluída</span>
+                    </label>
+                    <input id="skus-segunda-concluida" name="skusSegundaConcluida" type="number" min="0" step="1" placeholder="0" readonly>
+                </article>
+                <article class="card" data-field="percentualSemContagem">
+                    <label for="percentual-sem-contagem" class="card__label">
+                        <i class="card__icon fi fi-rr-chart-pie-alt" aria-hidden="true"></i>
+                        <span class="card__label-text">% sem contagem 1ª</span>
+                    </label>
+                    <div class="card__value card__value--with-suffix">
+                        <input id="percentual-sem-contagem" name="percentualSemContagem" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
+                        <span class="card__suffix" aria-hidden="true">%</span>
+                    </div>
+                </article>
+                <article class="card" data-field="percentualContadoSegunda">
+                    <label for="percentual-contado-segunda" class="card__label">
+                        <i class="card__icon fi fi-rr-stats" aria-hidden="true"></i>
+                        <span class="card__label-text">% contado 2ª</span>
+                    </label>
+                    <div class="card__value card__value--with-suffix">
+                        <input id="percentual-contado-segunda" name="percentualContadoSegunda" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
+                        <span class="card__suffix" aria-hidden="true">%</span>
+                    </div>
+                </article>
+                <article class="card" data-field="percentualSemContagemSegunda">
+                    <label for="percentual-sem-contagem-segunda" class="card__label">
+                        <i class="card__icon fi fi-rr-chart-pie" aria-hidden="true"></i>
+                        <span class="card__label-text">% sem contagem 2ª</span>
+                    </label>
+                    <div class="card__value card__value--with-suffix">
+                        <input id="percentual-sem-contagem-segunda" name="percentualSemContagemSegunda" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
+                        <span class="card__suffix" aria-hidden="true">%</span>
+                    </div>
+                </article>
+                <article class="card" data-field="percentualContadoPrimeira">
+                    <label for="percentual-contado-primeira" class="card__label">
+                        <i class="card__icon fi fi-rr-stats" aria-hidden="true"></i>
+                        <span class="card__label-text">% contado 1ª</span>
+                    </label>
+                    <div class="card__value card__value--with-suffix">
+                        <input id="percentual-contado-primeira" name="percentualContadoPrimeira" type="number" min="0" max="100" step="0.01" placeholder="0" readonly>
+                        <span class="card__suffix" aria-hidden="true">%</span>
+                    </div>
+                </article>
+                <article class="card" data-field="skusRestantePrimeira">
+                    <label for="skus-restante-primeira" class="card__label">
+                        <i class="card__icon fi fi-rr-hourglass-end" aria-hidden="true"></i>
+                        <span class="card__label-text">Restante 1ª contagem</span>
+                    </label>
+                    <input id="skus-restante-primeira" name="skusRestantePrimeira" type="number" min="0" step="1" placeholder="0" readonly>
+                </article>
+                <article class="card" data-field="skusPrimeiraConcluida">
+                    <label for="skus-primeira-concluida" class="card__label">
+                        <i class="card__icon fi fi-rr-check-circle" aria-hidden="true"></i>
+                        <span class="card__label-text">1ª contagem concluída</span>
+                    </label>
+                    <input id="skus-primeira-concluida" name="skusPrimeiraConcluida" type="number" min="0" step="1" placeholder="0" readonly>
+                </article>
+            </div>
+        </section>
+
     </main>
 
     <dialog id="config-modal" class="config-modal">
@@ -165,17 +191,18 @@
             <header class="config-modal__header">
                 <div class="config-modal__title">
                     <span class="config-modal__badge">Configuração ativa</span>
-
+                    <h2>Parâmetros de contagem</h2>
+                    <p>Informe os volumes que alimentam os indicadores do painel.</p>
                 </div>
-                <button type="button" id="close-config" class="btn btn--ghost" aria-label="Fechar configurações">
-                    Fechar
+                <button type="button" id="close-config" class="btn btn--icon btn--ghost" aria-label="Fechar configurações">
+                    <span class="btn__icon btn__icon--text" aria-hidden="true">&times;</span>
                 </button>
             </header>
 
             <section class="config-modal__overview" aria-label="Resumo das configurações">
                 <div class="config-modal__highlight" role="group" aria-labelledby="config-total-label">
                     <div class="config-modal__highlight-heading">
-                        <span class="config-modal__highlight-icon" aria-hidden="true">📊</span>
+                        <i class="config-modal__highlight-icon fi fi-rr-stats" aria-hidden="true"></i>
                         <div>
                             <p id="config-total-label" class="config-modal__highlight-label">Total projetado</p>
                             <p class="config-modal__highlight-help">Somatório automático das contagens informadas.</p>
@@ -186,7 +213,7 @@
                 <ul class="config-modal__tips" aria-label="Sugestões de preenchimento">
                     <li>Valores podem ser atualizados a qualquer momento.</li>
                     <li>Os campos aceitam apenas números inteiros.</li>
-                    <li>As metas diárias e previsões serão recalculadas automaticamente.</li>
+                    <li>Metas diárias e previsões são recalculadas automaticamente.</li>
                 </ul>
             </section>
 
@@ -206,7 +233,10 @@
             </div>
 
             <footer class="config-modal__footer">
-                <button type="submit" class="btn btn--primary">Salvar configurações</button>
+                <button type="submit" class="btn btn--primary">
+                    <i class="btn__icon fi fi-rr-disk" aria-hidden="true"></i>
+                    <span>Salvar configurações</span>
+                </button>
             </footer>
         </form>
     </dialog>
@@ -216,28 +246,32 @@
             <header class="config-modal__header">
                 <div class="config-modal__title">
                     <span class="config-modal__badge">Calendário</span>
+                    <h2>Parâmetros de dias</h2>
+                    <p>Acompanhe dias corridos e úteis calculados para a janela do inventário.</p>
                 </div>
-                <button type="button" id="close-parameters" class="btn btn--ghost" aria-label="Fechar parâmetros">Fechar</button>
+                <button type="button" id="close-parameters" class="btn btn--icon btn--ghost" aria-label="Fechar parâmetros">
+                    <span class="btn__icon btn__icon--text" aria-hidden="true">&times;</span>
+                </button>
             </header>
 
             <section class="parameters-modal__overview" aria-label="Resumo dos parâmetros de dias">
                 <div class="parameters-modal__callout" role="group" aria-labelledby="parameters-callout-title">
-                    <span class="parameters-modal__callout-icon" aria-hidden="true">🗓️</span>
+                    <i class="parameters-modal__callout-icon fi fi-rr-calendar-check" aria-hidden="true"></i>
                     <div class="parameters-modal__callout-body">
                         <p id="parameters-callout-title" class="parameters-modal__callout-title">Dados sincronizados</p>
-                        <p class="parameters-modal__callout-text">Os valores são atualizados automaticamente a partir do calendário operacional mais recente.</p>
+                        <p class="parameters-modal__callout-text">Os valores são atualizados a partir do calendário operacional mais recente.</p>
                     </div>
                 </div>
                 <ul class="parameters-modal__tips" aria-label="Boas práticas para acompanhamento">
-                    <li>Acompanhe a diferença entre dias corridos e úteis para ajustar as metas diárias.</li>
-                    <li>Quando novas janelas forem definidas, utilize o botão <strong>Salvar parâmetros</strong> para registrar.</li>
+                    <li>Acompanhe a diferença entre dias corridos e úteis para ajustar metas diárias.</li>
+                    <li>Ao definir novas janelas, utilize o botão <strong>Salvar parâmetros</strong> para registrar.</li>
                 </ul>
             </section>
 
             <section class="parameters-modal__cards" aria-label="Valores de referência">
                 <label class="parameters-modal__card">
                     <span class="parameters-modal__card-header">
-                        <span class="parameters-modal__card-icon" aria-hidden="true">🌐</span>
+                        <i class="parameters-modal__card-icon fi fi-rr-calendar" aria-hidden="true"></i>
                         <span>
                             <span class="parameters-modal__card-title">Dias corridos</span>
                             <span class="parameters-modal__card-tag">Período completo</span>
@@ -252,7 +286,7 @@
 
                 <label class="parameters-modal__card">
                     <span class="parameters-modal__card-header">
-                        <span class="parameters-modal__card-icon parameters-modal__card-icon--accent" aria-hidden="true">💼</span>
+                        <i class="parameters-modal__card-icon parameters-modal__card-icon--accent fi fi-rr-briefcase" aria-hidden="true"></i>
                         <span>
                             <span class="parameters-modal__card-title">Dias úteis</span>
                             <span class="parameters-modal__card-tag">Disponíveis para contagem</span>
@@ -267,7 +301,10 @@
             </section>
 
             <footer class="config-modal__footer">
-                <button type="submit" class="btn btn--primary">Salvar parâmetros</button>
+                <button type="submit" class="btn btn--primary">
+                    <i class="btn__icon fi fi-rr-disk" aria-hidden="true"></i>
+                    <span>Salvar parâmetros</span>
+                </button>
             </footer>
         </form>
     </dialog>
