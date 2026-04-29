@@ -7,6 +7,7 @@ const state = {
 	},
 	countMode: "primeira",
 };
+const DASHBOARD_CACHE_KEY = "inventarioRotativo.dashboard.v1";
 
 function parseNumber(value) {
 	if (value === null || value === undefined || value === "") {
@@ -29,6 +30,29 @@ function serializeInputs(map) {
 		acc[key] = input.value;
 		return acc;
 	}, {});
+}
+
+function safeReadDashboardCache() {
+	try {
+		const rawCache = window.localStorage?.getItem(DASHBOARD_CACHE_KEY);
+		if (!rawCache) {
+			return null;
+		}
+		return JSON.parse(rawCache);
+	} catch (error) {
+		console.warn("Não foi possível ler o cache local do dashboard.", error);
+		return null;
+	}
+}
+
+function safeWriteDashboardCache(payload) {
+	try {
+		window.localStorage?.setItem(DASHBOARD_CACHE_KEY, JSON.stringify(payload));
+		return true;
+	} catch (error) {
+		console.error("Não foi possível salvar o cache local do dashboard.", error);
+		return false;
+	}
 }
 
 function formatDateToBR(date) {
@@ -204,6 +228,72 @@ document.addEventListener("DOMContentLoaded", () => {
 		diasUteis: document.querySelector("#dias-uteis"),
 	};
 
+	function setInputValue(input, value) {
+		if (!input || value === null || value === undefined) {
+			return;
+		}
+		input.value = value;
+	}
+
+	function applyCachedDashboard(cache) {
+		if (!cache || typeof cache !== "object") {
+			return;
+		}
+
+		const cachedConfig = cache.config ?? {};
+		state.config = {
+			...state.config,
+			finalizadoSegundaContagem: parseNumber(cachedConfig.finalizadoSegundaContagem),
+			finalizadoPrimeiraContagem: parseNumber(cachedConfig.finalizadoPrimeiraContagem),
+			itensNovos: parseNumber(cachedConfig.itensNovos),
+			total: parseNumber(cachedConfig.total),
+		};
+		state.config.total =
+			state.config.finalizadoSegundaContagem +
+			state.config.finalizadoPrimeiraContagem +
+			state.config.itensNovos;
+
+		if (cache.countMode === "primeira" || cache.countMode === "segunda") {
+			state.countMode = cache.countMode;
+		}
+
+		setInputValue(dataAtualizacaoInput, cache.dataAtualizacao);
+		setInputValue(armazemInput, cache.armazem);
+		setInputValue(metricsInputs.previsaoTermino, cache.metrics?.previsaoTermino);
+		setInputValue(parametersInputs.diasNormal, cache.parameters?.diasNormal);
+		setInputValue(parametersInputs.diasUteis, cache.parameters?.diasUteis);
+
+		if (configTotalInput) {
+			configTotalInput.value = state.config.total ?? "";
+		}
+		populateConfigInputsFromState();
+	}
+
+	function buildDashboardCachePayload() {
+		syncConfigStateFromInputs({ skipDerived: true });
+		updateDerivedMetrics();
+
+		return {
+			version: 1,
+			savedAt: new Date().toISOString(),
+			countMode: state.countMode,
+			dataAtualizacao: dataAtualizacaoInput?.value ?? "",
+			armazem: armazemInput?.value ?? "",
+			config: { ...state.config },
+			metrics: serializeInputs(metricsInputs),
+			parameters: serializeInputs(parametersInputs),
+		};
+	}
+
+	function saveDashboardCache() {
+		const payload = buildDashboardCachePayload();
+		const saved = safeWriteDashboardCache(payload);
+		if (saved) {
+			console.info("Dashboard salvo no cache do navegador.", payload);
+		}
+		return saved;
+	}
+
 	function setCountMode(mode) {
 		if (mode !== "primeira" && mode !== "segunda") {
 			return;
@@ -242,12 +332,14 @@ document.addEventListener("DOMContentLoaded", () => {
 	countModeButtons.forEach((button) => {
 		button.addEventListener("click", () => {
 			setCountMode(button.dataset.countMode);
+			saveDashboardCache();
 		});
 	});
 
+	applyCachedDashboard(safeReadDashboardCache());
 	setCountMode(state.countMode);
 
-	if (dataAtualizacaoInput) {
+	if (dataAtualizacaoInput && !dataAtualizacaoInput.value) {
 		dataAtualizacaoInput.value = formatDateToBR(new Date());
 	}
 
@@ -406,6 +498,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	parametersForm?.addEventListener("submit", (event) => {
 		event.preventDefault();
+		updateDerivedMetrics();
+		saveDashboardCache();
 		toggleDialog(parametersModal, false);
 	});
 
@@ -417,12 +511,19 @@ document.addEventListener("DOMContentLoaded", () => {
 	});
 
 	metricsInputs.previsaoTermino?.addEventListener("change", () => {
+		saveDashboardCache();
 		scheduleAutoRefresh();
 	});
 
 	configForm?.addEventListener("submit", async (event) => {
 		event.preventDefault();
 		syncConfigStateFromInputs();
+		if (!saveDashboardCache()) {
+			alert("Não foi possível salvar as configurações no cache do navegador.");
+			return;
+		}
+		toggleDialog(configModal, false);
+
 		const payload = {
 			finalizadoSegundaContagem: state.config.finalizadoSegundaContagem,
 			finalizadoPrimeiraContagem: state.config.finalizadoPrimeiraContagem,
@@ -452,12 +553,10 @@ document.addEventListener("DOMContentLoaded", () => {
 			configTotalInput.value = state.config.total ?? "";
 			populateConfigInputsFromState();
 			updateDerivedMetrics();
+			saveDashboardCache();
 			console.info("Configurações atualizadas", state.config);
-			toggleDialog(configModal, false);
-			submitDashboard({ silent: true });
 		} catch (error) {
-			console.error(error);
-			alert("Não foi possível salvar as configurações. Tente novamente.");
+			console.warn("Configurações salvas localmente; sincronização remota indisponível.", error);
 		}
 	});
 
@@ -469,6 +568,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		syncConfigStateFromInputs({ skipDerived: true });
 		updateDerivedMetrics();
+		const cacheSaved = saveDashboardCache();
 
 		const metrics = serializeInputs(metricsInputs);
 		const parameters = serializeInputs(parametersInputs);
@@ -523,6 +623,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			latestDashboardResponseId = requestId;
 			applyDashboardResponse(data, { silent });
+			saveDashboardCache();
 
 			if (!silent) {
 				alert("Dashboard salvo com sucesso!");
@@ -530,8 +631,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		} catch (error) {
 			console.error(error);
 			runLocalCalendarFallback();
+			saveDashboardCache();
 			if (!silent) {
-				alert("Não foi possível salvar o dashboard. Verifique sua conexão e tente novamente.");
+				alert(cacheSaved
+					? "Dashboard salvo no cache do navegador."
+					: "Não foi possível salvar o dashboard no cache do navegador.");
 			}
 		}
 	}

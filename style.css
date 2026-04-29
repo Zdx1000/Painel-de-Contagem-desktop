@@ -307,10 +307,6 @@ button {
 	padding: 0 2px;
 }
 
-.section-heading--compact {
-	margin-top: 2px;
-}
-
 .section-heading__eyebrow {
 	margin-bottom: 7px;
 	background: var(--color-primary-soft);
@@ -324,16 +320,6 @@ button {
 	line-height: 1.2;
 	font-weight: 800;
 	color: var(--color-text);
-}
-
-.section-heading p {
-	margin: 0;
-	max-width: 460px;
-	font-size: 0.92rem;
-	line-height: 1.45;
-	font-weight: 500;
-	color: var(--color-muted);
-	text-align: right;
 }
 
 .cards-grid {
@@ -502,10 +488,24 @@ button {
 
 .card input[type="date"] {
 	min-height: 38px;
+	padding-right: 0;
 	font-family: "Inter", system-ui, sans-serif;
 	font-size: 1.08rem;
 	font-weight: 800;
 	color: rgba(15, 23, 42, 0.86);
+}
+
+.card input[type="date"]::-webkit-calendar-picker-indicator {
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	padding: 10px;
+	border-radius: var(--radius-lg);
+	background-color: var(--card-accent-soft);
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 18px 18px;
+	cursor: pointer;
 }
 
 .card__value input {
@@ -548,6 +548,10 @@ button {
 	--card-accent-dark: var(--color-outlook-dark);
 	--card-accent-soft: rgba(52, 211, 153, 0.18);
 	background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+}
+
+.card--outlook::after {
+	display: none;
 }
 
 [data-field="totalSkusEstoque"] {
@@ -951,11 +955,6 @@ button {
 		gap: 8px;
 	}
 
-	.section-heading p {
-		max-width: none;
-		text-align: left;
-	}
-
 	.config-modal__overview,
 	.parameters-modal__overview,
 	.config-modal__grid,
@@ -1034,8 +1033,7 @@ button {
 		font-size: 1.75rem;
 	}
 
-	.app__subtitle,
-	.section-heading p {
+	.app__subtitle {
 		font-size: 0.9rem;
 	}
 
