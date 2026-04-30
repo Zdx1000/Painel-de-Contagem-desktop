@@ -732,7 +732,7 @@ button {
 	font-family: "IBM Plex Mono", "Inter", system-ui, sans-serif;
 	font-size: 1.45rem;
 	font-weight: 800;
-	text-align: right;
+	text-align: center;
 }
 
 .config-modal__tips,
