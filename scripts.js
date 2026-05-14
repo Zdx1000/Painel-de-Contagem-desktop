@@ -228,6 +228,14 @@ document.addEventListener("DOMContentLoaded", () => {
 		diasUteis: document.querySelector("#dias-uteis"),
 	};
 
+	function syncCurrentDashboardDate() {
+		if (!dataAtualizacaoInput) {
+			return;
+		}
+
+		dataAtualizacaoInput.value = formatDateToBR(new Date());
+	}
+
 	function setInputValue(input, value) {
 		if (!input || value === null || value === undefined) {
 			return;
@@ -257,7 +265,6 @@ document.addEventListener("DOMContentLoaded", () => {
 			state.countMode = cache.countMode;
 		}
 
-		setInputValue(dataAtualizacaoInput, cache.dataAtualizacao);
 		setInputValue(armazemInput, cache.armazem);
 		setInputValue(metricsInputs.previsaoTermino, cache.metrics?.previsaoTermino);
 		setInputValue(parametersInputs.diasNormal, cache.parameters?.diasNormal);
@@ -271,6 +278,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	function buildDashboardCachePayload() {
 		syncConfigStateFromInputs({ skipDerived: true });
+		syncCurrentDashboardDate();
 		updateDerivedMetrics();
 
 		return {
@@ -338,10 +346,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	applyCachedDashboard(safeReadDashboardCache());
 	setCountMode(state.countMode);
-
-	if (dataAtualizacaoInput && !dataAtualizacaoInput.value) {
-		dataAtualizacaoInput.value = formatDateToBR(new Date());
-	}
+	syncCurrentDashboardDate();
 
 	function populateConfigInputsFromState() {
 		if (configInputs.finalizadoSegundaContagem) {
@@ -645,10 +650,6 @@ document.addEventListener("DOMContentLoaded", () => {
 			return;
 		}
 
-		if (data?.dataAtualizacao && dataAtualizacaoInput) {
-			dataAtualizacaoInput.value = data.dataAtualizacao;
-		}
-
 		if (data?.armazem && armazemInput) {
 			armazemInput.value = data.armazem;
 		}
@@ -672,6 +673,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		}
 
+		syncCurrentDashboardDate();
 		updateDerivedMetrics();
 
 		if (!silent) {
